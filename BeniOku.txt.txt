@@ -1,0 +1,57 @@
+ÇİÇEKSEPETİM E-TİCARET SİSTEMİ - KURULUM VE ÇALIŞTIRMA REHBERİ
+Bu proje, ASP.NET Core MVC mimarisi ve Microsoft SQL Server veritabanı kullanılarak geliştirilmiştir. Projenin eksiksiz çalışması için aşağıdaki adımları sırasıyla takip ediniz.
+
+1. ADIM: Veritabanının Geri Yüklenmesi (Restore Database)
+Proje içerisinde yer alan tüm tablolar, ilişkiler (ER Diyagramı), Stored Procedure, Trigger, View ve Fonksiyonlar CicekSepetimDb.bak dosyası içerisindedir.
+
+SQL Server Management Studio (SSMS) programını açın.
+
+Databases klasörüne sağ tıklayıp "Restore Database" seçeneğini seçin.
+
+Source kısmından Device seçeneğini işaretleyip CicekSepetimDb.bak dosyasını sisteme tanıtın.
+
+Geri yükleme işlemini tamamlayın.
+
+Not: Versiyon uyumsuzluğu yaşanması ihtimaline karşı, tüm veritabanı nesneleri ayrıca /veritabanitetkodlarivescriptdosyasi klasörü içinde .sql scriptleri olarak da sunulmuştur.
+
+2. ADIM: Bağlantı Ayarlarının Yapılması (Connection String)
+Yazılımın veritabanına erişebilmesi için bağlantı adresinin güncellenmesi gerekmektedir:
+
+Visual Studio üzerinden projeyi ( ciceksepetim.sln ) açın.
+
+appsettings.json dosyasını açın.
+
+DefaultConnection satırında yer alan Server=... kısmını kendi yerel SQL Server adınızla (veya . / localhost ile) değiştirin.
+
+Veritabanı adının CicekSepetimDb olduğundan emin olun.
+
+3. ADIM: Projenin Teknik İçeriği 
+Proje kapsamında aşağıdaki veritabanı nesneleri aktif olarak kullanılmaktadır:
+
+ER Diyagramı: Tablolar arası ilişkiler (PK-FK) SQL Server üzerinde tanımlanmıştır.
+
+Stored Procedures (5 Adet): Sipariş durumu güncelleme, stok kontrolü ve raporlama süreçlerinde kullanılmıştır.
+
+Triggerlar (4 Adet): Sipariş verildiğinde stoktan otomatik düşme ve iptal durumunda iade süreçlerini yönetir.
+
+Functions (3 Adet): KDV hesaplamaları ve dinamik metin formatlama işlemlerini yapar.
+
+View (1 Adet): Sipariş detaylarını ve müşteri bilgilerini birleştiren karmaşık sorgular için tasarlanmıştır.
+
+4. ADIM: Projenin Çalıştırılması
+Visual Studio'da F5 tuşuna basarak projeyi başlatın.
+
+Proje ilk açıldığında "Data Seeding" (Veri Tohumlama) özelliği sayesinde temel kategoriler ve örnek ürünler otomatik olarak yüklenecektir.
+
+Tarayıcı üzerinden ürün ekleme, sepet yönetimi ve sipariş süreçlerini test edebilirsiniz.
+
+5. DOSYA VE KLASÖR YAPISI
+/ciceksepetim: Uygulama kaynak kodları (MVC yapısı).
+
+CicekSepetimDb.bak: Hazır veritabanı yedek dosyası.
+
+/veritabanitetkodlarivescriptdosyasi: Tüm SQL kodlarının (SP, TRG, FN) yedek kodları.
+
+Benioku.txt: Kurulum rehberi.
+
+Proje_Raporu.docx: Proje detaylarını içeren teknik döküman.
