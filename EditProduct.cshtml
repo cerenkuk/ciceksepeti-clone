@@ -1,0 +1,225 @@
+﻿@model ciceksepetim.Models.Product
+
+@{
+    ViewData["Title"] = "Yeni Ürün Ekle";
+    var categories = ViewBag.Categories as List<ciceksepetim.Models.Category> ?? new List<ciceksepetim.Models.Category>();
+}
+
+<style>
+    :root {
+        --soft-pink: #FFD1DC;
+        --deep-pink: #FF85A1;
+        --soft-green: #E8F5E9;
+        --mint-green: #66BB6A;
+        --text-dark: #4A4A4A;
+    }
+
+    body {
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+    }
+
+    /* Üst Banner */
+    .form-header {
+        background: white;
+        border-radius: 25px;
+        border-left: 8px solid var(--mint-green);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    .nav-back-pill {
+        background: var(--soft-pink);
+        color: var(--deep-pink);
+        border-radius: 50px;
+        padding: 8px 20px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+        .nav-back-pill:hover {
+            background: var(--deep-pink);
+            color: white;
+        }
+
+    /* Form Kartı */
+    .form-card {
+        border: none;
+        border-radius: 25px;
+        background: white;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    }
+
+    .section-divider {
+        color: var(--mint-green);
+        border-bottom: 2px solid var(--soft-green);
+        padding-bottom: 8px;
+        margin-bottom: 25px;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    /* Input Tasarımları */
+    .form-label {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        margin-left: 5px;
+    }
+
+    .input-group-text {
+        background-color: var(--soft-green);
+        border: 1px solid var(--soft-green);
+        color: var(--mint-green);
+        border-radius: 15px 0 0 15px;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid var(--soft-green);
+        border-radius: 15px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--deep-pink);
+            box-shadow: 0 0 0 0.25rem rgba(255, 133, 161, 0.1);
+        }
+
+    .input-group > .form-control {
+        border-radius: 0 15px 15px 0;
+    }
+
+    /* Kaydet Butonu */
+    .btn-save-product {
+        background-color: var(--mint-green);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 187, 106, 0.3);
+    }
+
+        .btn-save-product:hover {
+            background-color: #57a95b;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-cancel {
+        color: #9B9B9B;
+        font-weight: 600;
+        text-decoration: none;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="form-header p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+                <span class="fs-2">➕</span>
+            </div>
+            <div>
+                <h1 class="h3 fw-bold mb-0">Yeni Ürün Ekle</h1>
+                <p class="mb-0 text-muted small">Kataloğunuza yeni güzellikler katın.</p>
+            </div>
+        </div>
+        <a asp-action="Products" class="nav-back-pill shadow-sm">
+            <i class="fas fa-arrow-left me-1"></i> Ürünlere Dön
+        </a>
+    </div>
+
+    <div class="card form-card">
+        <div class="card-body p-4 p-md-5">
+            <form asp-action="CreateProduct" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 rounded-4 small mb-4"></div>
+
+                <h5 class="section-divider"><i class="fas fa-leaf me-2"></i>Genel Bilgiler</h5>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label">Ürün Adı</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                            <input asp-for="Name" class="form-control" placeholder="Örn: Pembe Şakayık Buketi" required />
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Slug" class="form-label">URL Uzantısı (Slug)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-link"></i></span>
+                            <input asp-for="Slug" class="form-control" placeholder="pembe-sakayik-buketi" />
+                        </div>
+                        <span asp-validation-for="Slug" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <h5 class="section-divider"><i class="fas fa-coins me-2"></i>Görünüm & Maliyet</h5>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label asp-for="ImageUrl" class="form-label">Görsel URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-image"></i></span>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://resim-adresi.com/cicek.jpg" />
+                        </div>
+                        <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Price" class="form-label">Satış Fiyatı</label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold">₺</span>
+                            <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" required />
+                        </div>
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="Stock" class="form-label">Stok Adedi</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-boxes"></i></span>
+                            <input asp-for="Stock" type="number" class="form-control" placeholder="0" required />
+                        </div>
+                        <span asp-validation-for="Stock" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <h5 class="section-divider"><i class="fas fa-th-large me-2"></i>Kategori Seçimi</h5>
+                <div class="row g-4 mb-5">
+                    <div class="col-md-12">
+                        <label asp-for="CategorySlug" class="form-label">Hangi Kategoride Listelensin?</label>
+                        <select asp-for="CategorySlug" class="form-select shadow-none">
+                            <option value="">-- Bir Kategori Seçiniz --</option>
+                            @foreach (var c in categories)
+                            {
+                                <option value="@c.Slug">@c.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CategorySlug" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between pt-4 border-top">
+                    <a asp-action="Products" class="btn-cancel">
+                        <i class="fas fa-times me-1"></i> Vazgeç
+                    </a>
+                    <button type="submit" class="btn btn-save-product shadow-sm">
+                        <i class="fas fa-heart me-2"></i>Ürünü Mağazaya Ekle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

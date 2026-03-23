@@ -1,0 +1,138 @@
+﻿@model List<ciceksepetim.Models.SavedAddress>
+@{
+    ViewData["Title"] = "Adreslerim";
+}
+
+<style>
+    :root {
+        --soft-pink: #FFD1DC;
+        --soft-green: #E8F5E9;
+        --mint-green: #66BB6A;
+        --deep-pink: #FF85A1;
+    }
+
+    .address-card {
+        border: 2px solid var(--soft-pink);
+        border-radius: 20px;
+        transition: transform 0.3s ease;
+        background: white;
+    }
+
+        .address-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .default-badge {
+        background: var(--soft-green);
+        color: #2E7D32;
+        border: 1px solid var(--mint-green);
+        border-radius: 50px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
+
+    .btn-add-address {
+        background: var(--mint-green);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+        .btn-add-address:hover {
+            background: #4caf50;
+            color: white;
+        }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #4A4A4A;">📍 Adreslerim</h2>
+        @if (TempData["ok"] is string ok)
+        {
+            <div class="alert alert-success border-0 shadow-sm rounded-pill py-2 px-4">@ok</div>
+        }
+    </div>
+
+    <div class="row g-4 mb-5">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center py-5 bg-white border-dashed rounded-4" style="border: 2px dashed var(--soft-pink);">
+                <p class="text-muted">🌸 Henüz bir adres eklemediniz.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var a in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="address-card h-100 p-4 shadow-sm @(a.IsDefault ? "border-2 shadow" : "")"
+                         style="@(a.IsDefault ? "border-color: var(--mint-green)" : "")">
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5 class="fw-bold mb-0">@a.FullName</h5>
+                            @if (a.IsDefault)
+                            {
+                                <span class="default-badge">Varsayılan</span>
+                            }
+                        </div>
+
+                        <p class="text-muted small mb-2"><i class="fas fa-phone-alt me-2 text-success"></i>@a.Phone</p>
+                        <p class="text-secondary mb-4">@a.AddressLine <br> <strong>@a.District / @a.City</strong></p>
+
+                        <div class="d-flex gap-2 border-top pt-3 mt-auto">
+                            <form asp-action="DeleteAddress" method="post" onsubmit="return confirm('Silmek istediğinize emin misiniz?')">
+                                <input type="hidden" name="id" value="@a.Id" />
+                                <button class="btn btn-sm text-danger fw-bold">🗑️ Sil</button>
+                            </form>
+                            @if (!a.IsDefault)
+                            {
+                                <form asp-action="SetDefaultAddress" method="post">
+                                    <input type="hidden" name="id" value="@a.Id" />
+                                    <button class="btn btn-sm text-success fw-bold">⭐ Varsayılan Yap</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @* Yeni Adres Formu *@
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header border-0 py-3" style="background: var(--soft-green);">
+            <h5 class="fw-bold mb-0 text-success">➕ Yeni Adres Ekle</h5>
+        </div>
+        <div class="card-body p-4 bg-white">
+            <form asp-action="AddAddress" method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Ad Soyad</label>
+                        <input name="FullName" class="form-control border-0 bg-light rounded-3" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Telefon</label>
+                        <input name="Phone" class="form-control border-0 bg-light rounded-3" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">İl</label>
+                        <input name="City" class="form-control border-0 bg-light rounded-3" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">İlçe</label>
+                        <input name="District" class="form-control border-0 bg-light rounded-3" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold">Adres Detayı</label>
+                        <textarea name="AddressLine" class="form-control border-0 bg-light rounded-3" rows="2"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-add-address px-5 py-2 shadow-sm">Adresi Kaydet 🌸</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

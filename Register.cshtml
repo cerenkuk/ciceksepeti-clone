@@ -1,0 +1,88 @@
+﻿@model ciceksepetim.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Kaydol";
+}
+
+<style>
+    /* Gradient Buton Stili */
+    .btn-soft-gradient {
+        background: linear-gradient(135deg, var(--mint-green) 0%, #a8e6cf 50%, var(--soft-pink) 100%);
+        background-size: 200% auto;
+        border: none;
+        border-radius: 50px;
+        padding: 14px;
+        font-weight: 700;
+        color: #484848; /* Koyu gri yazı daha soft durur */
+        transition: 0.5s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+        .btn-soft-gradient:hover {
+            background-position: right center; /* Gradienti kaydırır */
+            transform: translateY(-2px);
+            color: #333;
+            box-shadow: 0 6px 20px rgba(255, 209, 220, 0.4);
+        }
+
+    .register-card {
+        border-radius: 35px;
+        border: 2px solid var(--soft-pink) !important;
+        background: #ffffff;
+    }
+
+    .form-control-custom {
+        border-radius: 15px;
+        border: 2px solid #f8f8f8;
+        padding: 12px 18px;
+        background: #fafafa;
+    }
+
+        .form-control-custom:focus {
+            border-color: var(--mint-green);
+            background: var(--soft-green);
+            box-shadow: none;
+        }
+</style>
+
+<div class="container mt-5 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card register-card border-0 shadow-lg">
+                <div class="card-header bg-white border-0 pt-5 text-center">
+                    <div class="display-4 mb-2">🎈</div>
+                    <h2 class="fw-bold text-dark">Aramıza Katıl</h2>
+                    <p class="text-muted small">Fırsatlarla dolu çiçekli bir dünyaya ilk adım</p>
+                </div>
+                <div class="card-body px-5 pb-5">
+                    <form asp-action="Register" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="small fw-bold text-muted ms-2">Ad Soyad</label>
+                            <input asp-for="FullName" class="form-control form-control-custom" placeholder="Adınız ve soyadınız" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="small fw-bold text-muted ms-2">E-posta</label>
+                            <input asp-for="Email" type="email" class="form-control form-control-custom" placeholder="ornek@email.com" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Password" class="small fw-bold text-muted ms-2">Şifre</label>
+                            <div class="input-group">
+                                <input asp-for="Password" type="password" id="Password" class="form-control form-control-custom border-end-0" placeholder="••••••" style="border-radius: 15px 0 0 15px;" />
+                                <button type="button" class="btn border-2 border-start-0 bg-light" onclick="togglePwd(this, 'Password')" style="border-color:#f8f8f8; border-radius: 0 15px 15px 0; color: var(--mint-green);">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-soft-gradient w-100 mb-3">Kaydı Tamamla ✨</button>
+
+                        <p class="text-center mt-3 text-muted small">
+                            Zaten hesabın var mı? <a asp-action="Login" class="fw-bold text-decoration-none" style="color: #d18ea0;">Giriş yap</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

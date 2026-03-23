@@ -1,0 +1,576 @@
+﻿@model ciceksepetim.Models.SellerDashboardViewModel
+@{
+    ViewData["Title"] = "Satıcı Kontrol Paneli";
+}
+
+<div class="seller-dashboard">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="header-icon">🏪</div>
+            <div>
+                <h1>Satıcı Kontrol Paneli</h1>
+                <p class="header-subtitle">Mağazanızın genel görünümü ve istatistikleri</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h3 class="section-title">⚡ Hızlı İşlemler</h3>
+        <div class="actions-grid">
+            <a asp-controller="Seller" asp-action="CreateProduct" class="action-card action-primary">
+                <div class="action-icon">➕</div>
+                <div class="action-content">
+                    <h4>Yeni Ürün Ekle</h4>
+                    <p>Mağazanıza yeni ürün ekleyin</p>
+                </div>
+                <div class="action-arrow">→</div>
+            </a>
+            <a asp-controller="Seller" asp-action="Products" class="action-card action-secondary">
+                <div class="action-icon">📦</div>
+                <div class="action-content">
+                    <h4>Ürünlerimi Yönet</h4>
+                    <p>Ürünlerinizi görüntüle ve düzenle</p>
+                </div>
+                <div class="action-arrow">→</div>
+            </a>
+            <a asp-controller="Seller" asp-action="Messages" class="action-card action-message">
+                <div class="action-icon">💬</div>
+                <div class="action-content">
+                    <h4>Müşteri Mesajları</h4>
+                    <p>@(ViewBag.UnreadSellerMessages ?? 0) yeni mesaj</p>
+                </div>
+                <div class="action-badge">@(ViewBag.UnreadSellerMessages ?? 0)</div>
+            </a>
+            <a asp-controller="Seller" asp-action="GiftCardMessages" class="action-card action-giftcard">
+                <div class="action-icon">💌</div>
+                <div class="action-content">
+                    <h4>Hediye Mesaj Kartları</h4>
+                    <p>Müşteri hediye notlarını yönetin</p>
+                </div>
+                <div class="action-arrow">→</div>
+            </a>
+            <a asp-controller="Seller" asp-action="Reviews" class="action-card action-review">
+                <div class="action-icon">⭐</div>
+                <div class="action-content">
+                    <h4>Müşteri Yorumları</h4>
+                    <p>Ortalama: @Model.AverageRating.ToString("N1") / 5</p>
+                </div>
+                <div class="action-badge">@Model.TotalReviews</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <h3 class="section-title">📊 İstatistikler</h3>
+        <div class="stats-grid">
+            <a asp-controller="Seller" asp-action="Products" class="stat-card stat-primary">
+                <div class="stat-header">
+                    <span class="stat-label">Toplam Ürün</span>
+                    <div class="stat-icon">📦</div>
+                </div>
+                <div class="stat-value">@Model.TotalProducts</div>
+                <div class="stat-footer">Tüm ürünleriniz</div>
+            </a>
+
+            <a asp-controller="Seller" asp-action="Orders" class="stat-card stat-warning">
+                <div class="stat-header">
+                    <span class="stat-label">Bekleyen Siparişler</span>
+                    <div class="stat-icon">⏳</div>
+                </div>
+                <div class="stat-value">@Model.PendingOrders</div>
+                <div class="stat-footer">Onay bekleyen siparişler</div>
+            </a>
+
+            <a asp-controller="Seller" asp-action="Orders" class="stat-card stat-success">
+                <div class="stat-header">
+                    <span class="stat-label">Bu Ayki Gelir</span>
+                    <div class="stat-icon">💰</div>
+                </div>
+                <div class="stat-value">@Model.MonthlySalesRevenue.ToString("C")</div>
+                <div class="stat-footer">Aylık toplam gelir</div>
+            </a>
+
+            <a asp-controller="Seller" asp-action="Orders" class="stat-card stat-info">
+                <div class="stat-header">
+                    <span class="stat-label">Toplam Gelir</span>
+                    <div class="stat-icon">💵</div>
+                </div>
+                <div class="stat-value">@Model.TotalSalesRevenue.ToString("C")</div>
+                <div class="stat-footer">Tüm zamanların toplamı</div>
+            </a>
+
+            <div class="sales-chart-section">
+                <h3 class="section-title">📈 Satış Performansı (Son 4 Hafta)</h3>
+                <div class="panel chart-fixed-wrapper">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const ctx = document.getElementById('salesChart').getContext('2d');
+
+                    // C# Listelerini JS Dizisine Dönüştürüyoruz
+                    // Eğer veriler boşsa hata vermemesi için varsayılan olarak [0,0,0,0] atıyoruz
+                    const chartLabels = @Html.Raw(Json.Serialize(Model.WeeklyLabels ?? new List<string> { "4. Hafta Önce", "3. Hafta Önce", "2. Hafta Önce", "Bu Hafta" }));
+                    const revenueData = @Html.Raw(Json.Serialize(Model.WeeklyRevenueChart ?? new List<decimal> { 0, 0, 0, 0 }));
+                    const orderData = @Html.Raw(Json.Serialize(Model.WeeklyOrderCountChart ?? new List<int> { 0, 0, 0, 0 }));
+
+                    const salesChartConfig = {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [
+                                {
+                                    label: 'Haftalık Gelir (₺)',
+                                    data: revenueData,
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    borderWidth: 4,
+                                    tension: 0.4,
+                                    fill: true,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Sipariş Adedi',
+                                    data: orderData,
+                                    type: 'bar',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                                    borderRadius: 6,
+                                    barThickness: 35,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top', labels: { font: { weight: '600' } } }
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: { display: true, text: 'Gelir (TL)' },
+                                    beginAtZero: true
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: { display: true, text: 'Sipariş Sayısı' },
+                                    grid: { drawOnChartArea: false },
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    };
+
+                    new Chart(ctx, salesChartConfig);
+                });
+            </script>
+           
+    <div class="top-products-section">
+        <h3 class="section-title">🚀 En Çok Kazandıran Ürünler (Top 5)</h3>
+        <div class="panel">
+            @if (Model.TopSellingProducts != null && Model.TopSellingProducts.Any())
+            {
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Ürün Adı</th>
+                            <th>Satılan Adet</th>
+                            <th>Toplam Ciro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TopSellingProducts)
+                        {
+                            <tr>
+                                <td class="product-id">@item.ProductId</td>
+                                <td class="product-name"><strong>@item.ProductName</strong></td>
+                                <td class="product-qty">
+                                    <span class="badge-qty">@item.TotalQuantitySold adet</span>
+                                </td>
+                                <td class="product-revenue">
+                                    <span class="revenue-amount">@item.TotalRevenue.ToString("C2")</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <p>Bu filtre kriterlerine uygun satış verisi bulunmamaktadır.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const salesData = {
+            labels: ['1. Hafta', '2. Hafta', '3. Hafta', '4. Hafta'],
+            datasets: [
+                {
+                    label: 'Toplam Gelir (TL)',
+                    data: [
+                        25000 + (Math.random() * 5000),
+                        32000 + (Math.random() * 5000),
+                        28500 + (Math.random() * 5000),
+                        38000 + (Math.random() * 5000)
+                    ],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: false,
+                    pointBackgroundColor: '#10b981',
+                },
+                {
+                    label: 'Sipariş Sayısı',
+                    data: [
+                        120 + (Math.random() * 30),
+                        150 + (Math.random() * 30),
+                        135 + (Math.random() * 30),
+                        180 + (Math.random() * 30)
+                    ],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    type: 'bar',
+                    yAxisID: 'y1'
+                }
+            ]
+        };
+
+        const salesChartConfig = {
+            type: 'line',
+            data: salesData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Gelir (TL)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Sipariş Adedi' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        };
+
+        new Chart(document.getElementById('salesChart'), salesChartConfig);
+    });
+</script>
+
+<style>
+    :root {
+        --primary: #10b981;
+        --accent: #059669;
+        --secondary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --info: #06b6d4;
+        --danger: #ef4444;
+        --giftcard: #8b5cf6;
+        --white: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --bg: #f9fafb;
+        --line: #e5e7eb;
+        --radius: 0.5rem;
+        --radius-lg: 0.75rem;
+        --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --review-color: #f97316;
+    }
+
+    .seller-dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-icon {
+        font-size: 4rem;
+        background: rgba(255, 255, 255, 0.2);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .header-subtitle {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .quick-actions {
+        margin-bottom: 3rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-card {
+        background: var(--white);
+        border: 2px solid var(--line);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        text-decoration: none;
+        color: var(--text);
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .action-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            transform: scaleY(0);
+            transition: var(--transition);
+        }
+
+        .action-card:hover::before {
+            transform: scaleY(1);
+        }
+
+    .action-primary:hover {
+        border-color: var(--primary);
+    }
+
+    .action-secondary:hover {
+        border-color: var(--secondary);
+    }
+
+    .action-message:hover {
+        border-color: var(--warning);
+    }
+
+    .action-giftcard:hover {
+        border-color: var(--giftcard);
+    }
+
+    .action-giftcard::before {
+        background: var(--giftcard);
+    }
+
+    .action-review:hover {
+        border-color: var(--review-color);
+    }
+
+    .action-review::before {
+        background: var(--review-color);
+    }
+
+    .action-icon {
+        font-size: 3rem;
+        width: 70px;
+        height: 70px;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius);
+        flex-shrink: 0;
+    }
+
+    .action-content h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .action-content p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+    }
+
+    .action-badge {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .stats-section {
+        margin-bottom: 3rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border: 2px solid var(--line);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-xl);
+        }
+
+    .stat-primary {
+        border-left: 4px solid var(--primary);
+    }
+
+    .stat-warning {
+        border-left: 4px solid var(--warning);
+    }
+
+    .stat-success {
+        border-left: 4px solid var(--success);
+    }
+
+    .stat-info {
+        border-left: 4px solid var(--info);
+    }
+
+    .stat-danger {
+        border-left: 4px solid var(--danger);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .sales-chart-section {
+        margin-bottom: 3rem;
+    }
+
+    .chart-container {
+        height: 400px;
+        padding: 1.5rem;
+        background: var(--white);
+        border: 2px solid var(--line);
+        border-radius: var(--radius-lg);
+    }
+
+    .panel {
+        background: var(--white);
+        border: 2px solid var(--line);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .products-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .products-table thead th {
+            background: var(--bg);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid var(--line);
+        }
+
+        .products-table tbody td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+    .revenue-amount {
+        font-weight: 800;
+        color: var(--primary);
+    }
+
+            .chart-fixed-wrapper {
+                height: 400px; /* Yüksekliği burada sabitlemek grafiğin kaymasını %100 durdurur */
+                width: 100%;
+                position: relative;
+                padding: 20px;
+            }
+</style>

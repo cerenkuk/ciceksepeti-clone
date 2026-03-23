@@ -1,0 +1,272 @@
+﻿@model ciceksepetim.Models.Order
+@{
+    ViewData["Title"] = $"Sipariş #{Model.Id}";
+}
+
+<style>
+    :root {
+        --soft-pink: #FFD1DC;
+        --deep-pink: #FF85A1;
+        --soft-green: #E8F5E9;
+        --mint-green: #66BB6A;
+        --text-dark: #4A4A4A;
+    }
+
+    body {
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+    }
+
+    /* Kart Tasarımları */
+    .detail-card {
+        border: none;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .section-header {
+        border-bottom: 2px solid var(--soft-green);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: var(--mint-green);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Navigasyon Butonu */
+    .nav-back {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 15px;
+        color: var(--deep-pink);
+        text-decoration: none;
+        box-shadow: 0 4px 10px rgba(255, 133, 161, 0.2);
+        transition: all 0.3s ease;
+    }
+
+        .nav-back:hover {
+            background: var(--soft-pink);
+            color: white;
+            transform: translateX(-3px);
+        }
+
+    /* Durum Rozeti */
+    .status-badge-lg {
+        background-color: var(--soft-pink);
+        color: var(--deep-pink);
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    /* Hediye Notu */
+    .gift-note-detail {
+        background: #FFF9FA;
+        border: 2px dashed var(--soft-pink);
+        border-radius: 15px;
+        padding: 20px;
+    }
+
+    /* Tablo Düzeni */
+    .table thead {
+        background-color: var(--soft-green);
+        color: var(--mint-green);
+    }
+
+        .table thead th {
+            border: none;
+            border-radius: 10px;
+        }
+
+    /* Form Elemanları */
+    .form-select, .form-control {
+        border-radius: 12px;
+        border: 1px solid var(--soft-green);
+        padding: 10px;
+    }
+
+        .form-select:focus, .form-control:focus {
+            border-color: var(--soft-pink);
+            box-shadow: 0 0 0 0.25rem rgba(255, 209, 220, 0.25);
+        }
+
+    .btn-pink {
+        background-color: var(--deep-pink);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-pink:hover {
+            background-color: #ff6b8d;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-green {
+        background-color: var(--mint-green);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 12px;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Orders" class="nav-back shadow-sm"><i class="fas fa-chevron-left"></i></a>
+            <div>
+                <h2 class="fw-bold mb-0" style="color: var(--text-dark)">Sipariş Detayı</h2>
+                <span class="text-muted">#@Model.Id numaralı siparişin detayları</span>
+            </div>
+        </div>
+        <div class="status-badge-lg shadow-sm">
+            <i class="fas fa-tag me-2"></i>@Model.Status
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <div class="card detail-card p-4 mb-4">
+                <div class="row">
+                    <div class="col-md-6 border-end">
+                        <h6 class="section-header"><i class="fas fa-map-marker-alt"></i>Teslimat Adresi</h6>
+                        <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                        <p class="text-muted mb-0 small">@Model.AddressLine1</p>
+                        <p class="fw-bold text-dark">@Model.District / @Model.City</p>
+                    </div>
+                    <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
+                        <h6 class="section-header"><i class="fas fa-calendar-heart" style="color: var(--deep-pink)"></i>Teslimat Zamanı</h6>
+                        <div class="p-3 rounded-3" style="background-color: var(--soft-green)">
+                            <div class="d-flex align-items-center">
+                                <i class="far fa-clock fa-2x text-success me-3"></i>
+                                <div>
+                                    <span class="d-block fw-bold text-dark fs-5">@Model.DeliveryScheduledTime?.ToString("dd MMMM yyyy")</span>
+                                    <span class="text-success fw-bold">Saat: @Model.DeliveryScheduledTime?.ToString("HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card detail-card p-4">
+                <h6 class="section-header"><i class="fas fa-shopping-bag"></i>Siparişteki Ürünler</h6>
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle">
+                        <thead>
+                            <tr>
+                                <th class="p-3">Ürün Bilgisi</th>
+                                <th class="text-center p-3">Adet</th>
+                                <th class="text-end p-3">Fiyat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr style="border-bottom: 1px solid var(--soft-green)">
+                                    <td class="py-3 fw-bold text-dark">@item.Name</td>
+                                    <td class="text-center py-3">
+                                        <span class="badge rounded-pill px-3 py-2" style="background-color: var(--soft-pink); color: var(--deep-pink)">
+                                            @item.Qty Adet
+                                        </span>
+                                    </td>
+                                    <td class="text-end py-3 fw-bold text-dark">@(item.UnitPrice?.ToString("C2") ?? "0,00 TL")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.GeneralGiftMessage))
+                {
+                    <div class="gift-note-detail mt-4">
+                        <small class="fw-bold text-uppercase d-block mb-2" style="color: var(--deep-pink)">
+                            <i class="fas fa-gift me-2"></i>Müşterinin Hediye Notu
+                        </small>
+                        <p class="mb-0 fs-5 fst-italic text-dark">"@Model.GeneralGiftMessage"</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card detail-card p-4 mb-4 shadow-sm" style="border-top: 5px solid var(--deep-pink)">
+                <h6 class="fw-bold mb-3" style="color: var(--deep-pink)"><i class="fas fa-tasks me-2"></i>Durum Güncelle</h6>
+                <form asp-action="UpdateOrderStatus" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="orderId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <select name="newStatus" class="form-select shadow-none">
+                            <option value="Alindi" selected="@(Model.Status == OrderStatus.Alindi)">Alındı</option>
+                            <option value="Hazirlaniyor" selected="@(Model.Status == OrderStatus.Hazirlaniyor)">Hazırlanıyor</option>
+                            <option value="Kargolandı" selected="@(Model.Status == OrderStatus.Kargolandı)">Kargolandı</option>
+                            <option value="TeslimEdildi" selected="@(Model.Status == OrderStatus.TeslimEdildi)">Teslim Edildi</option>
+                            <option value="IptalEdildi" selected="@(Model.Status == OrderStatus.IptalEdildi)">İptal Edildi</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-pink w-100 shadow-sm">Durumu Güncelle</button>
+                </form>
+            </div>
+
+            <div class="card detail-card p-4 shadow-sm" style="border-top: 5px solid var(--mint-green)">
+                <h6 class="fw-bold mb-3" style="color: var(--mint-green)"><i class="fas fa-truck me-2"></i>Kargo Bilgileri</h6>
+
+                @if (!string.IsNullOrWhiteSpace(Model.TrackingNumber))
+                {
+                    <div class="p-3 rounded-3 mb-4" style="background-color: var(--soft-green); border-left: 4px solid var(--mint-green)">
+                        <span class="d-block small fw-bold text-success">@Model.CargoCompany</span>
+                        <span class="text-dark fw-bold small">Takip No: @Model.TrackingNumber</span>
+                    </div>
+                }
+                <div class="order-summary-item" style="display: flex; justify-content: space-between; padding: 10px; border-top: 1px solid #eee;">
+                    <span>Ürün Toplamı:</span>
+                    <strong>@((Model.Total - (Model.Shipping ?? 0))?.ToString("C"))</strong>
+                </div>
+
+                <div class="order-summary-item" style="display: flex; justify-content: space-between; padding: 10px; color: #666;">
+                    <span>Kargo Ücreti:</span>
+                    <strong>@((Model.Shipping ?? 0).ToString("C"))</strong>
+                </div>
+
+                <div class="order-summary-item" style="display: flex; justify-content: space-between; padding: 10px; font-size: 1.2rem; color: #e91e63;">
+                    <span>Genel Toplam:</span>
+                    <strong>@Model.Total?.ToString("C")</strong>
+                </div>
+                <form asp-action="UpdateCargoAction" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="orderId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-1">Kargo Firması</label>
+                        <select name="cargoCompany" class="form-select shadow-none" required>
+                            <option value="Aras Kargo">Aras Kargo</option>
+                            <option value="Yurtiçi Kargo">Yurtiçi Kargo</option>
+                            <option value="MNG Kargo">MNG Kargo</option>
+                            <option value="PTT Kargo">PTT Kargo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-1">Takip Numarası</label>
+                        <input type="text" name="trackingNumber" class="form-control shadow-none" placeholder="Örn: 12345678" required />
+                    </div>
+                    <button type="submit" class="btn btn-green w-100 shadow-sm text-white">Kargo Bilgisi Kaydet</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

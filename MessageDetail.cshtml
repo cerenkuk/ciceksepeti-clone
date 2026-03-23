@@ -1,0 +1,136 @@
+﻿@model List<ciceksepetim.Models.Message>
+@{
+    var conversationId = Model.First().ConversationId ?? Model.First().Id;
+    var originalMessage = Model.First();
+    var senderEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+    var otherPartyEmail = originalMessage.SenderEmail == senderEmail ? originalMessage.RecipientEmail : originalMessage.SenderEmail;
+    ViewData["Title"] = "Mesaj Detayı";
+}
+
+<style>
+    :root {
+        --chat-pink: #FFF0F3;
+        --chat-green: #F1FBF2;
+        --deep-pink: #FF85A1;
+        --mint-green: #66BB6A;
+    }
+
+    .chat-header {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    }
+
+    .chat-container {
+        height: 500px;
+        overflow-y: auto;
+        background-color: #fdfdfd;
+        border-radius: 25px;
+        padding: 30px;
+        border: 1px solid #f0f0f0;
+    }
+
+    .bubble {
+        padding: 12px 20px;
+        border-radius: 20px;
+        max-width: 75%;
+        margin-bottom: 20px;
+        position: relative;
+        font-size: 0.95rem;
+    }
+
+    .bubble-me {
+        background-color: var(--chat-green);
+        color: #2D5A27;
+        border-bottom-right-radius: 2px;
+        border: 1px solid #e0f2e1;
+    }
+
+    .bubble-other {
+        background-color: var(--chat-pink);
+        color: #7A2E3E;
+        border-bottom-left-radius: 2px;
+        border: 1px solid #ffe1e6;
+    }
+
+    .reply-card {
+        border: none;
+        border-radius: 25px;
+        background: white;
+        box-shadow: 0 -10px 25px rgba(0,0,0,0.02);
+    }
+
+    .reply-input {
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        border-radius: 20px !important;
+        padding: 15px;
+    }
+
+    .btn-send {
+        background-color: var(--mint-green);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 10px 30px;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+
+        .btn-send:hover {
+            background-color: #57a95b;
+            transform: scale(1.05);
+        }
+</style>
+
+<div class="container py-4">
+    <div class="chat-header p-3 mb-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-action="Messages" class="btn btn-outline-secondary rounded-circle border-0"><i class="fas fa-chevron-left"></i></a>
+            <div>
+                <h5 class="fw-bold mb-0">@originalMessage.Subject</h5>
+                <small class="text-muted">@otherPartyEmail ile görüşüyorsunuz</small>
+            </div>
+        </div>
+        <span class="badge bg-light text-muted rounded-pill px-3">#@conversationId</span>
+    </div>
+
+    <div class="chat-container mb-4 shadow-inner" id="chatBox">
+        @foreach (var msg in Model.OrderBy(m => m.SentDate))
+        {
+            var isMe = msg.SenderEmail == senderEmail;
+            <div class="d-flex @(isMe ? "justify-content-end" : "justify-content-start")">
+                <div class="bubble @(isMe ? "bubble-me shadow-sm" : "bubble-other shadow-sm")">
+                    <div class="small fw-bold mb-1 opacity-50">@(isMe ? "Siz" : "Müşteri")</div>
+                    <div>@msg.Content</div>
+                    <div class="text-end mt-1" style="font-size: 0.7rem; opacity: 0.5;">
+                        @msg.SentDate.ToString("HH:mm")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card reply-card">
+        <div class="card-body p-4">
+            <form asp-action="ReplyMessage" method="post">
+                <input type="hidden" name="conversationId" value="@conversationId" />
+                <div class="form-group mb-3">
+                    <textarea name="content" class="form-control reply-input" rows="3" placeholder="Mesajınızı buraya yazın..." style="resize: none;" required></textarea>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Kibar bir dil kullanmak her zaman kazandırır 🌸</small>
+                    <button type="submit" class="btn btn-send shadow-sm">
+                        Gönder <i class="fas fa-paper-plane ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sayfa açıldığında en alta kaydır
+    var chatBox = document.getElementById("chatBox");
+    chatBox.scrollTop = chatBox.scrollHeight;
+</script>

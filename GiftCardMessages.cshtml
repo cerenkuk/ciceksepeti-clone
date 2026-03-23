@@ -1,0 +1,186 @@
+﻿@model List<ciceksepetim.Models.SellerGiftCardViewModel>
+@{
+    ViewData["Title"] = "Hediye Mesaj Kartları";
+}
+
+<style>
+    :root {
+        --soft-pink: #FFD1DC;
+        --deep-pink: #FF85A1;
+        --soft-green: #E8F5E9;
+        --mint-green: #66BB6A;
+        --text-dark: #4A4A4A;
+    }
+
+    body {
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+    }
+
+    /* Üst Banner */
+    .gift-header {
+        background: white;
+        border-radius: 25px;
+        border-left: 8px solid var(--deep-pink);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    .gift-card-table {
+        border: none;
+        border-radius: 25px;
+        background: white;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    }
+
+    /* Tablo Başlığı */
+    .table thead th {
+        background-color: var(--soft-green);
+        color: var(--mint-green);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        padding: 15px;
+        border: none;
+    }
+
+    /* Hediye Notu Kutusu */
+    .gift-note-box {
+        background: #FFF9FA;
+        border-left: 4px solid var(--deep-pink);
+        padding: 15px;
+        border-radius: 12px;
+        font-style: italic;
+        font-family: 'Georgia', serif;
+        position: relative;
+        color: #6a4a4e;
+    }
+
+    .quote-icon {
+        color: var(--soft-pink);
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+
+    /* Durum Rozetleri (Badges) */
+    .badge-status {
+        border-radius: 50px;
+        padding: 6px 15px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .status-alindi {
+        background: #FFF3CD;
+        color: #856404;
+        border: 1px solid #FFEeba;
+    }
+
+    .status-hazirlaniyor {
+        background: #E1F5FE;
+        color: #01579B;
+        border: 1px solid #B3E5FC;
+    }
+
+    .status-teslim {
+        background: var(--soft-green);
+        color: #2E7D32;
+        border: 1px solid #C8E6C9;
+    }
+
+    /* Link Stili */
+    .order-link {
+        color: var(--mint-green);
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+        .order-link:hover {
+            color: var(--deep-pink);
+        }
+</style>
+
+<div class="container py-5">
+    <div class="gift-header p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width:60px; height:60px;">
+                <span class="fs-2">💝</span>
+            </div>
+            <div>
+                <h1 class="h3 fw-bold mb-0">Hediye Kartları</h1>
+                <p class="mb-0 text-muted small">Müşterilerinizin sevdiklerine ilettiği özel notlar.</p>
+            </div>
+        </div>
+        <div class="badge bg-white text-dark border rounded-pill px-4 py-2 fw-bold shadow-sm">
+            <i class="fas fa-envelope-open-text me-2 text-danger"></i> @Model.Count Mesaj Bulundu
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card gift-card-table overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Sipariş</th>
+                            <th>Ürün Detayı</th>
+                            <th style="width: 40%;">Hediye Mesajı</th>
+                            <th>Tarih</th>
+                            <th class="pe-4 text-center">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">#@item.OrderId</div>
+                                    <a asp-controller="Seller" asp-action="Orders" class="order-link small text-decoration-none">
+                                        İncele <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="fw-bold" style="color: var(--text-dark);">@item.Name</div>
+                                    <span class="badge bg-light text-muted border rounded-pill fw-normal">@item.Qty Adet</span>
+                                </td>
+                                <td>
+                                    <div class="gift-note-box shadow-sm">
+                                        <i class="fas fa-quote-left quote-icon"></i>
+                                        <span>@(string.IsNullOrEmpty(item.GiftCardMessage) ? item.GeneralGiftMessage : item.GiftCardMessage)</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small fw-bold">@item.OrderDate.ToString("dd MMM yyyy")</div>
+                                    <div class="small text-muted opacity-75">@item.OrderDate.ToString("HH:mm")</div>
+                                </td>
+                                <td class="pe-4 text-center">
+                                    @{
+                                        var (statusLabel, statusClass) = item.OrderStatus.ToString() switch
+                                        {
+                                            "Alindi" => ("Yeni Sipariş", "status-alindi"),
+                                            "Hazirlaniyor" => ("Hazırlanıyor", "status-hazirlaniyor"),
+                                            "TeslimEdildi" => ("Teslim Edildi", "status-teslim"),
+                                            _ => (item.OrderStatus.ToString(), "bg-light text-muted")
+                                        };
+                                    }
+                                    <span class="badge badge-status @statusClass">
+                                        @statusLabel
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-white rounded-5 shadow-sm border mt-4">
+            <div class="display-1 mb-3">🕊️</div>
+            <h3 class="fw-bold text-dark">Henüz kart mesajı yok</h3>
+            <p class="text-muted">Gelecek olan güzel notlar burada sergilenecek.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,96 @@
+﻿@model List<ciceksepetim.Models.SavedCard>
+@{
+    ViewData["Title"] = "Kayıtlı Kartlarım";
+}
+
+<style>
+    .credit-card-pastel {
+        background: linear-gradient(135deg, var(--soft-pink) 0%, var(--soft-green) 100%);
+        border-radius: 20px;
+        color: #4A4A4A;
+        border: none;
+        height: 200px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    }
+
+    .card-number {
+        letter-spacing: 4px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 1.2rem;
+        text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+    }
+</style>
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-4" style="color: #4A4A4A;">💳 Kayıtlı Kartlarım</h2>
+
+    <div class="row g-4 mb-5">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center py-5 rounded-4 bg-white border" style="border: 2px dashed var(--soft-pink) !important;">
+                <p class="text-muted mb-0">Henüz kayıtlı kartınız yok.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var c in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card credit-card-pastel p-4 d-flex flex-column justify-content-between">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <span class="fw-bold text-uppercase">@c.Brand</span>
+                            <i class="fas fa-leaf text-success"></i>
+                        </div>
+                        <div class="card-number text-center my-3">@c.Masked</div>
+                        <div class="d-flex justify-content-between small">
+                            <div>
+                                <small class="d-block opacity-75">Kart Sahibi</small>
+                                <span class="fw-bold">@c.HolderName.ToUpper()</span>
+                            </div>
+                            <div class="text-end">
+                                <small class="d-block opacity-75">SKT</small>
+                                <span class="fw-bold">@c.Exp</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-end">
+                            <form asp-action="DeleteCard" method="post" onsubmit="return confirm('Kartı silmek istiyor musunuz?')">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                <button type="submit" class="btn btn-sm p-0 text-danger opacity-75 fw-bold">🗑️ Kartı Sil</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @* Kart Ekleme Formu *@
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 bg-white">
+            <h5 class="fw-bold mb-4 text-pink" style="color: var(--deep-pink);">💳 Yeni Kart Ekle</h5>
+            <form asp-action="AddCard" method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="small fw-bold mb-1">Kart Sahibi</label>
+                        <input name="holderName" class="form-control border-0 bg-light rounded-3" placeholder="AD SOYAD" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold mb-1">Kart Numarası</label>
+                        <input name="pan" class="form-control border-0 bg-light rounded-3" maxlength="16" placeholder="**** **** **** ****" required />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="small fw-bold mb-1">Ay</label>
+                        <input name="expMonth" class="form-control border-0 bg-light rounded-3" placeholder="MM" required />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="small fw-bold mb-1">Yıl</label>
+                        <input name="expYear" class="form-control border-0 bg-light rounded-3" placeholder="YY" required />
+                    </div>
+                    <div class="col-12 text-end">
+                        <button class="btn btn-add-address px-5" style="background: var(--soft-pink); color: #8c5260; border: 2px solid #ffb6c1;">Güvenle Kaydet ✨</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

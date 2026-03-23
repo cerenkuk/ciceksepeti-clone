@@ -1,0 +1,208 @@
+﻿@using ciceksepetim.Models
+@model ciceksepetim.Models.Order
+@{
+    bool isSeller = User.IsInRole("Seller") || User.IsInRole("Admin");
+    ViewData["Title"] = isSeller ? $"Yönetim: #{Model?.Id}" : "Sipariş Detayım";
+
+    if (Model == null)
+    {
+        <div class="container mt-5"><div class="alert alert-danger rounded-4">Sipariş verisi bulunamadı.</div></div>
+        return;
+    }
+}
+
+<style>
+    :root {
+        --soft-pink: #fce4ec;
+        --deep-pink: #f06292;
+        --soft-green: #e8f5e9;
+        --mint-green: #2e7d32;
+        --border-radius: 24px;
+    }
+
+    .order-status-card {
+        background: linear-gradient(135deg, var(--soft-green) 0%, #ffffff 100%);
+        border-radius: var(--border-radius);
+        border: 2px solid #c8e6c9;
+        padding: 2rem;
+    }
+
+    .custom-section-card {
+        border-radius: var(--border-radius);
+        border: 1px solid #eee;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+        background-color: var(--soft-pink);
+        color: #c2185b;
+        font-weight: 800;
+        padding: 1rem 1.5rem;
+        border-bottom: 2px solid #f8bbd0;
+    }
+
+    .gift-note-box {
+        background: #fff9fb;
+        border: 2px dashed var(--deep-pink);
+        border-radius: 18px;
+        padding: 1.5rem;
+        position: relative;
+    }
+
+    .gift-badge {
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        background: white;
+        padding: 0 10px;
+        color: var(--deep-pink);
+        font-weight: bold;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="order-status-card d-flex justify-content-between align-items-center mb-4 shadow-sm">
+        <div>
+            <h2 class="fw-bold mb-1 text-success"><i class="fas fa-check-circle me-2"></i> Sipariş Detayı</h2>
+            <span class="text-muted">Sipariş No: <strong class="text-dark">#@Model.Id</strong></span>
+        </div>
+        <div class="text-end">
+            <span class="badge rounded-pill px-4 py-2 fs-6" style="background-color: var(--mint-green);">@Model.Status</span>
+            <div class="small text-muted mt-2">@Model.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="custom-section-card">
+                <div class="section-header">📍 Teslimat Bilgileri</div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 border-end">
+                            <h6 class="text-muted small text-uppercase fw-bold">Alıcı</h6>
+                            <h5 class="fw-bold text-dark mb-2">@Model.FullName</h5>
+                            <p class="mb-1 text-muted">@Model.AddressLine1</p>
+                            <p class="text-muted small">@Model.District / @Model.City</p>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <h6 class="text-muted small text-uppercase fw-bold">Teslimat Zamanı</h6>
+                            <div class="d-flex align-items-center mt-2">
+                                <div class="rounded-circle bg-light p-3 me-3">
+                                    <i class="fas fa-clock text-success fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark fs-5">
+                                        @if (Model.DeliveryScheduledTime.HasValue)
+                                        {
+                                            @Model.DeliveryScheduledTime.Value.ToString("HH:mm")
+                                        }
+                                        else
+                                        {
+                                            <span>Belirlenmedi</span>
+                                        }
+                                    </div>
+                                    <div class="text-muted small">
+                                        @Model.DeliveryScheduledTime?.ToString("dd MMMM yyyy")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h5 class="fw-bold border-bottom pb-2">Ödeme Özeti</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ürün Toplamı:</span>
+                        @* Ara toplam için Subtotal, null ise 0m kabul et ve formatla *@
+                        <span class="fw-bold">@((Model.Subtotal ?? 0m).ToString("C2"))</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>🚚 Kargo Ücreti:</span>
+                        <span>@((Model.Shipping ?? 0m) > 0 ? (Model.Shipping ?? 0m).ToString("C2") : "Ücretsiz")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold fs-5 text-success">
+                        <span>Genel Toplam:</span>
+                        <span>@((Model.Total ?? 0m).ToString("C2"))</span>
+                    </div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.GeneralGiftMessage))
+            {
+            }
+        </div>
+        <div class="shipping-info" style="background: #fdf2f8; padding: 15px; border-radius: 8px; margin-top: 10px;">
+            <p style="margin: 0; color: #d81b60;">
+                <i class="fas fa-truck"></i>
+                <strong>Kargo Ücreti:</strong> @(Model.Shipping > 0 ? Model.Shipping?.ToString("C") : "Ücretsiz Kargo")
+            </p>
+        </div>
+    </div>
+
+            @if (!string.IsNullOrEmpty(Model.GeneralGiftMessage))
+            {
+                <div class="gift-note-box mt-4 shadow-sm">
+                    <span class="gift-badge">🌸 Hediye Notu</span>
+                    <p class="mb-0 fs-5 text-dark italic" style="font-style: italic; font-family: 'Georgia', serif;">
+                        "@Model.GeneralGiftMessage"
+                    </p>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-5">
+            <div class="custom-section-card">
+                <div class="section-header" style="background-color: var(--soft-green); color: var(--mint-green); border-bottom-color: #c8e6c9;">
+                    📦 Ürün Özeti
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr class="small text-uppercase">
+                                    <th class="ps-4">Ürün</th>
+                                    <th class="text-center">Adet</th>
+                                    <th class="text-end pe-4">Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            <div class="fw-bold text-dark">@item.Name</div>
+                                            <div class="text-muted x-small">Ürün Kodu: #@item.ProductId</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border rounded-pill">@item.Qty</span>
+                                        </td>
+                                        <td class="text-end pe-4 fw-bold">
+                                            @item.LineTotal.ToString("C2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot style="background: #f8fdf9;">
+                                <tr>
+                                    <td colspan="2" class="text-end ps-4 py-3 fw-bold">Genel Toplam:</td>
+                                    <td class="text-end pe-4 py-3 text-success fs-4 fw-bolder">
+                                        @(Model.Total?.ToString("C2") ?? "0,00 ₺")
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <a asp-action="Index" class="btn btn-outline-secondary w-100 rounded-pill fw-bold mt-2 py-3">
+                <i class="fas fa-arrow-left me-2"></i> Siparişlerime Dön
+            </a>
+        </div>
+    </div>
+</div>

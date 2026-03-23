@@ -1,0 +1,53 @@
+﻿@model List<ciceksepetim.Models.Product>
+@{
+    ViewData["Title"] = ViewBag.Category ?? "Koleksiyon";
+    var favs = Context.Session.GetObj<HashSet<int>>("favs") ?? new HashSet<int>();
+}
+
+<div class="container py-4">
+    <header class="text-center mb-5">
+        <h2 class="display-6 fw-bold" style="color: #2e7d32;">@ViewData["Title"]</h2>
+        <div class="mx-auto mt-2" style="width: 60px; height: 4px; background: #f06292; border-radius: 2px;"></div>
+    </header>
+
+    <div class="row g-4">
+        @foreach (var p in Model)
+        {
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card">
+                    <div class="position-relative">
+                        <a asp-action="Detail" asp-route-id="@p.Id">
+                            <img src="@p.ImageUrl" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        </a>
+                        <form asp-controller="Favorites" asp-action="Toggle" method="post" class="position-absolute top-0 end-0 p-2">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button class="btn btn-white shadow-sm rounded-circle p-2" style="width: 35px; height: 35px; line-height: 1;">
+                                @(favs.Contains(p.Id) ? "❤️" : "🤍")
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body text-center p-3">
+                        <h6 class="fw-bold mb-2 text-dark">@p.Name</h6>
+                        <p class="text-success fw-bold mb-3 fs-5">@p.Price.ToString("C2")</p>
+                        <form asp-controller="Cart" asp-action="Add" method="post">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button class="btn btn-outline-success w-100 rounded-pill btn-sm fw-bold">
+                                <i class="fas fa-shopping-cart me-1"></i> Sepete Ekle
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: transform 0.3s;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+        }
+</style>

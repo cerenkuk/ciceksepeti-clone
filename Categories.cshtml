@@ -1,0 +1,128 @@
+﻿@model List<ciceksepetim.Models.Category>
+@{
+    ViewData["Title"] = "Kategoriler";
+}
+
+<style>
+    .admin-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .input-custom {
+        border-radius: 12px;
+        border: 2px solid #f0f0f0;
+        padding: 10px 15px;
+        transition: 0.3s;
+    }
+
+        .input-custom:focus {
+            border-color: var(--mint-green);
+            outline: none;
+            background: #f9fff9;
+        }
+
+    .btn-add {
+        background: var(--mint-green);
+        color: white;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        padding: 10px 25px;
+        transition: 0.3s;
+    }
+
+        .btn-add:hover {
+            background: #4caf50;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    .table-container {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .badge-slug {
+        background: var(--soft-green);
+        color: #2e7d32;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-family: monospace;
+    }
+
+    .btn-delete {
+        color: #dc3545;
+        background: #fff5f5;
+        border: 1px solid #ffebeb;
+        border-radius: 10px;
+        padding: 5px 12px;
+        transition: 0.3s;
+    }
+
+        .btn-delete:hover {
+            background: #dc3545;
+            color: white;
+        }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center mb-4">
+        <div class="bg-primary text-white p-3 rounded-4 shadow-sm me-3">
+            <i class="fas fa-tags fa-2x"></i>
+        </div>
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Kategori Yönetimi</h2>
+            <p class="text-muted mb-0">Ürün gruplarını buradan ekleyebilir veya silebilirsiniz.</p>
+        </div>
+    </div>
+
+    <div class="card admin-card p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-plus-circle text-success me-2"></i>Yeni Kategori Ekle</h5>
+        <form asp-action="AddCategory" method="post" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="small fw-bold text-muted ms-2">Kategori Adı</label>
+                <input name="name" class="form-control input-custom" placeholder="Örn: Taze Çiçekler" required />
+            </div>
+            <div class="col-md-5">
+                <label class="small fw-bold text-muted ms-2">Slug (URL Yapısı)</label>
+                <input name="slug" class="form-control input-custom" placeholder="Örn: taze-cicekler" required />
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-add w-100">Ekle</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container shadow-sm">
+        <table class="table align-middle">
+            <thead class="text-muted small text-uppercase">
+                <tr>
+                    <th class="ps-3">Kategori Adı</th>
+                    <th>URL Yapısı (Slug)</th>
+                    <th class="text-end pe-3">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td class="ps-3 fw-bold text-dark">@c.Name</td>
+                        <td><span class="badge-slug">/@c.Slug</span></td>
+                        <td class="text-end pe-3">
+                            <form asp-action="DeleteCategory" method="post" style="display:inline" onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">
+                                <input type="hidden" name="slug" value="@c.Slug" />
+                                <button class="btn btn-delete btn-sm">
+                                    <i class="fas fa-trash-alt me-1"></i> Sil
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

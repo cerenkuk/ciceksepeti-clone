@@ -1,0 +1,178 @@
+﻿@model List<ciceksepetim.Models.Order>
+
+@{
+    ViewData["Title"] = "Siparişlerim";
+}
+
+<style>
+    :root {
+        --soft-pink: #FFD1DC;
+        --deep-pink: #FF85A1;
+        --soft-green: #E8F5E9;
+        --mint-green: #66BB6A;
+        --text-dark: #4A4A4A;
+    }
+
+    body {
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+    }
+
+    .order-container {
+        max-width: 800px;
+    }
+
+    .page-title {
+        color: var(--deep-pink);
+        position: relative;
+        display: inline-block;
+        margin-bottom: 30px;
+    }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background-color: var(--soft-pink);
+            border-radius: 10px;
+        }
+
+    .order-card {
+        border: none;
+        border-radius: 20px;
+        background: white;
+        transition: all 0.3s ease;
+        border-left: 6px solid var(--soft-pink);
+    }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 133, 161, 0.15) !important;
+            border-left: 6px solid var(--deep-pink);
+        }
+
+    .status-badge {
+        background-color: var(--soft-green);
+        color: var(--mint-green);
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .order-id {
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .date-text {
+        font-size: 0.85rem;
+        color: #9B9B9B;
+    }
+
+    .cargo-info {
+        background-color: #FFF9FA;
+        border-radius: 12px;
+        padding: 10px 15px;
+        border: 1px dashed var(--soft-pink);
+    }
+
+    .btn-detail {
+        background-color: var(--deep-pink);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-detail:hover {
+            background-color: #ff6b8d;
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 133, 161, 0.3);
+        }
+
+    .empty-cargo {
+        color: var(--mint-green);
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    .footer-note {
+        background-color: var(--soft-green);
+        border-radius: 15px;
+        color: var(--mint-green);
+        font-weight: 500;
+    }
+</style>
+
+<div class="container py-5 order-container">
+    <h2 class="fw-bold page-title">🌸 Siparişlerim</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var order in Model)
+        {
+            <div class="card mb-4 shadow-sm order-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="order-id mb-1">Sipariş #@order.Id</h5>
+                            <p class="date-text mb-0">
+                                <i class="far fa-calendar-alt me-1"></i> @order.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+                            </p>
+                        </div>
+                        <span class="status-badge">
+                            <i class="fas fa-dot-circle me-1"></i> @order.Status
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        @if (!string.IsNullOrWhiteSpace(order.TrackingNumber))
+                        {
+                            <div class="cargo-info">
+                                <p class="mb-0 small">
+                                    <strong class="text-pink" style="color:var(--deep-pink)">Kargo Şirketi:</strong> @order.CargoCompany
+                                </p>
+                                <p class="mb-0 small">
+                                    <strong class="text-pink" style="color:var(--deep-pink)">Takip No:</strong> @order.TrackingNumber
+                                </p>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="empty-cargo mb-0">
+                                <i class="fas fa-hourglass-half me-1"></i> Henüz kargo bilgisi girilmemiş.
+                            </p>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <a asp-action="OrderDetail"
+                           asp-route-id="@order.Id"
+                           class="btn btn-detail shadow-sm">
+                            Detayları Gör
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <h4 class="text-muted">Henüz bir siparişiniz bulunmuyor.</h4>
+            <a href="/" class="btn btn-detail mt-3">Alışverişe Başla</a>
+        </div>
+    }
+
+    <div class="footer-note p-3 mt-5 text-center shadow-sm">
+        <p class="mb-0 small">
+            <i class="fas fa-info-circle me-1"></i> Bir sorun mu var? Lütfen destek birimiyle iletişime geçin.
+        </p>
+    </div>
+</div>
